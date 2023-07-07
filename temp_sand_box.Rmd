@@ -1,0 +1,88 @@
+---
+title: "Untitled"
+output: pdf_document
+date: "2023-07-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("/home/carson/Desktop/Github/invariMH/R/orthogonal_group.R")
+
+```
+
+
+```{r}
+
+n <- 1
+sig <- .1
+t <- .3
+s <- seq(0.01, .99, by = .005)
+n_s <- length(s)
+
+y <- rep(0, n_s)
+z <- y
+
+for (i in (1:n_s)) {
+  y[i] <- g_bar(n, s[i], t, sig)
+  z[i] <- sample_g_bar(t, sig)
+}
+plot(s, y)
+hist(z, freq = FALSE, breaks = 15)
+```
+```{r}
+
+sig <- .1
+t1 <- 1
+t2 <- 3
+sig1 <- .5
+sig2 <- .5
+f_bar <- f_bar_conc_bimodal(t1, t2, sig1, sig2)
+
+t <- seq(0.01, 4.99, length.out = 10000)
+n_t <- length(t)
+
+y <- rep(0, n_t)
+for (i in (1:n_t)) {
+  y[i] <- f_bar(t[i])
+}
+plot(t, y)
+
+
+
+
+```
+```{r}
+n <- 2
+r <- 1
+n_samp <- 10
+samples <- matrix(0, n, n_samp)
+for (i in (1:n_samp)) {
+  sample <- runif_sphere(n, r)
+  samples[, i] <- sample
+}
+
+samples
+
+
+```
+
+
+
+```{r}
+t1 <- 1 
+t2 <- 3  
+sig1 <- .5 
+sig2 <- .5
+
+f_bar <- f_bar_conc_bimodal(t1, t2, sig1, sig2)
+
+t0 <- .1
+n_samp <- 300
+samples <- qmh_orthogonal_grp(f_bar, t0, n_samp)
+
+hist(samples, freq = FALSE, breaks = 10)
+```
+
