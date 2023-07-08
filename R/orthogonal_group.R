@@ -13,7 +13,7 @@
 #' @export
 g_bar <- function(n, s, t, sig) {
   if (s > 0) {
-    y <- t^(n-1) * exp(-1/(2 * sig^2) * (s - t)^2)
+    y <- t^(1-n) * exp(-1/(2 * sig^2) * (s - t)^2)
     return(y)
   } else {
     return(0)
@@ -72,25 +72,30 @@ sample_g_bar <- function(t, sig) {
 #' @param sig (positive number) The standard dev of the proposal
 #' @return Samples from target distribution
 #' @examples
-#' samples <- qmh_orthogonal_grp(f_bar, t_0, n_samp);
-qmh_orthogonal_grp <- function(f_bar, t_0, n_samp, sig) {
+#' samples <- qmh_orthogonal_grp(f_bar, t_0, n_samp, sig);
+qmh_orthogonal_grp <- function(n, f_bar, t_0, n_samp, sig) {
   samples <- rep(0, n_samp)
   t <- t_0
-  n <- 1
-  while (n <= n_samp) {
+  i <- 1
+  while (i <= n_samp) {
     s <- sample_g_bar(t, sig)
     ratio <- (f_bar(s) * g_bar(n, t, s, sig)) / (f_bar(t) * g_bar(n, s, t, sig))
-    print(ratio)
-    print(" and ")
-    print(s)
+    #print("top")
+    #print(f_bar(s))
+    #print(g_bar(n, t, s, sig))
+    #print("bottom")
+    #print(f_bar(t))
+    #print(g_bar(n, s, t, sig))
+    #print("state")
+    #print(s)
     alpha <- min(1, ratio)
 
     u <- runif(1)
     if (u <= alpha) {
       t <- s
     }
-    samples[n] <- t
-    n <- n + 1
+    samples[i] <- t
+    i <- i + 1
   }
 
   return(samples)
