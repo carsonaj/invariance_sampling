@@ -69,10 +69,11 @@ sample_g_bar <- function(t, sig) {
 #' @param f_bar (function) The induced density on the quotient
 #' @param t_0 (positive number) The starting location for the chain
 #' @param n_samples (positive integer) The number of consecutive samples desired
+#' @param sig (positive number) The standard dev of the proposal
 #' @return Samples from target distribution
 #' @examples
 #' samples <- qmh_orthogonal_grp(f_bar, t_0, n_samp);
-qmh_orthogonal_grp <- function(f_bar, t_0, n_samp) {
+qmh_orthogonal_grp <- function(f_bar, t_0, n_samp, sig) {
   samples <- rep(0, n_samp)
   t <- t_0
   n <- 1

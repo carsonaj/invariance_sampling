@@ -77,11 +77,13 @@ t2 <- 3
 sig1 <- .5 
 sig2 <- .5
 
+sig <- .05
+
 f_bar <- f_bar_conc_bimodal(t1, t2, sig1, sig2)
 
 t0 <- .1
-n_samp <- 300
-samples <- qmh_orthogonal_grp(f_bar, t0, n_samp)
+n_samp <- 1000
+samples <- qmh_orthogonal_grp(f_bar, t0, n_samp, sig)
 
 hist(samples, freq = FALSE, breaks = 10) 
 ```
