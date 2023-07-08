@@ -90,3 +90,4 @@ samples <- qmh_orthogonal_grp(n, f_bar, t0, n_samp, sig)
 hist(samples[seq(1000, 80000, by = 200)], freq = FALSE, breaks = 15) 
 ```
 
+sandbox
