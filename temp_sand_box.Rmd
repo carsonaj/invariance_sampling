@@ -55,10 +55,15 @@ plot(t, y)
 
 
 ```
+
+
+
+
+
 ```{r}
 n <- 2
 r <- 1
-n_samp <- 10
+n_samp <- 100
 samples <- matrix(0, n, n_samp)
 for (i in (1:n_samp)) {
   sample <- runif_sphere(n, r)
@@ -67,27 +72,32 @@ for (i in (1:n_samp)) {
 
 samples
 
-
+plot(samples[1, ], samples[2, ])
 ```
 
 
 
 ```{r}
-n <- 1
+n <- 2
 t1 <- 5 
 t2 <- 10  
-sig1 <- .5 
-sig2 <- .5
+sig1 <- 1
+sig2 <- 1
 
 sig <- 1
 
 f_bar <- f_bar_conc_bimodal(t1, t2, sig1, sig2)
 
 t0 <- 2
-n_samp <- 80000
-samples <- qmh_orthogonal_grp(n, f_bar, t0, n_samp, sig)
+n_samp <- 100000
+samples_quotient <- qmh_orth_grp_quotient(n, f_bar, t0, n_samp, sig)
 
-hist(samples[seq(1000, 80000, by = 200)], freq = FALSE, breaks = 15) 
+hist(samples_quotient[seq(1000, 80000, by = 200)], freq = FALSE, breaks = 15) 
+
+samples <- qmh_orth_grp(n, f_bar, t0, n_samp, sig)
+samples1 <- samples[seq(10000, 80000, by = 200), ]
+plot(samples1[ , 1], samples1[ , 2], cex = .1)
 ```
 
-sandbox
+
+

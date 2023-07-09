@@ -66,28 +66,21 @@ sample_g_bar <- function(t, sig) {
 
 #' Sample from induced target distribution using Quotient Metropolis-Hastings
 #' on Rn / O(n)
+#' @param n (positive integer) The dimension of the ambient space
 #' @param f_bar (function) The induced density on the quotient
 #' @param t_0 (positive number) The starting location for the chain
 #' @param n_samples (positive integer) The number of consecutive samples desired
 #' @param sig (positive number) The standard dev of the proposal
 #' @return Samples from target distribution
 #' @examples
-#' samples <- qmh_orthogonal_grp(f_bar, t_0, n_samp, sig);
-qmh_orthogonal_grp <- function(n, f_bar, t_0, n_samp, sig) {
+#' samples <- qmh_orthogonal_grp(n, f_bar, t_0, n_samp, sig);
+qmh_orth_grp_quotient <- function(n, f_bar, t_0, n_samp, sig) {
   samples <- rep(0, n_samp)
   t <- t_0
   i <- 1
   while (i <= n_samp) {
     s <- sample_g_bar(t, sig)
     ratio <- (f_bar(s) * g_bar(n, t, s, sig)) / (f_bar(t) * g_bar(n, s, t, sig))
-    #print("top")
-    #print(f_bar(s))
-    #print(g_bar(n, t, s, sig))
-    #print("bottom")
-    #print(f_bar(t))
-    #print(g_bar(n, s, t, sig))
-    #print("state")
-    #print(s)
     alpha <- min(1, ratio)
 
     u <- runif(1)
@@ -100,6 +93,39 @@ qmh_orthogonal_grp <- function(n, f_bar, t_0, n_samp, sig) {
 
   return(samples)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' Sample from induced target distribution using Quotient Metropolis-Hastings
+#' on Rn / O(n)
+#' @param n (positive integer) The dimension of the ambient space
+#' @param f_bar (function) The induced density on the quotient
+#' @param t_0 (positive number) The starting location for the chain
+#' @param n_samples (positive integer) The number of consecutive samples desired
+#' @param sig (positive number) The standard dev of the proposal
+#' @return Samples from target distribution
+#' @examples
+#' samples <- qmh_orthogonal_grp(n, f_bar, t_0, n_samp, sig);
+qmh_orth_grp <- function(n, f_bar, t_0, n_samp, sig) {
+  samples <- matrix(0, n_samp, n)
+  samples_quotient <- qmh_orth_grp_quotient(n, f_bar, t_0, n_samp, sig)
+  for (i in (1:n_samp)) {
+    samples[i, ] <- t(runif_sphere(n, samples_quotient[i]))
+  }
+
+  return(samples)
+}
+
 
 
 
