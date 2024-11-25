@@ -1,0 +1,76 @@
+---
+title: "Untitled"
+output: pdf_document
+date: "2023-10-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r fig.align="center", echo = FALSE,fig.width = 10}
+diffeo <- function(input_mat){
+    n <- nrow(input_mat)
+    output_mat <- matrix(0, n, 2)
+    
+    for (i in (1:n)) {
+    x <- input_mat[i, 1]
+    y <- input_mat[i, 2]
+    u <- x
+    v <- y + x^3 - x^2 + x -1
+    
+    output_mat[i, 1] <- u
+    output_mat[i, 2] <- v
+    }
+    
+    return(output_mat)
+}
+
+n <- 1000
+x1 <- seq(-1 + .001, 1 - .001, length.out = n)
+x2 <- seq(-sqrt(.5) + .001, sqrt(.5) - .001, length.out = n)
+
+y1_plus <- sqrt(1 - x1^2)
+y1_minus <- -sqrt(1 - x1^2)
+
+y2_plus <- sqrt(.5 - x2^2)
+y2_minus <- -sqrt(.5 - x2^2)
+
+input1_mat_plus <- matrix(cbind(x1, y1_plus), n, 2)
+input1_mat_minus <- matrix(cbind(x1, y1_minus), n, 2)
+output1_mat_plus <- diffeo(input1_mat_plus)
+output1_mat_minus <- diffeo(input1_mat_minus)
+
+input2_mat_plus <- matrix(cbind(x2, y2_plus), n, 2)
+input2_mat_minus <- matrix(cbind(x2, y2_minus), n, 2)
+output2_mat_plus <- diffeo(input2_mat_plus)
+output2_mat_minus <- diffeo(input2_mat_minus)
+
+input1_df <- data.frame(rbind(input1_mat_plus, input1_mat_minus))
+output1_df <- data.frame(rbind(output1_mat_plus, output1_mat_minus))
+
+input2_df <- data.frame(rbind(input2_mat_plus, input2_mat_minus))
+output2_df <- data.frame(rbind(output2_mat_plus, output2_mat_minus))
+
+input_df <- rbind(input1_df, input2_df)
+output_df <- rbind(output1_df, output2_df)
+
+input_df$type <- rep("input", 2*n)
+output_df$type <- rep("output", 2*n)
+
+df <- rbind(input_df, output_df)
+
+library(ggplot2)
+p_input <- ggplot(input_df) + geom_point(aes(x = X1, y = X2))
+p_output <- ggplot(output_df) + geom_point(aes(x = X1, y = X2))
+
+p <- ggplot(df,) +
+    geom_point(aes(x = X1, y = X2)) +
+    facet_grid(. ~ type, scales = "free") 
+
+p
+path <- "/home/carson/Desktop/Github/invariMH/Figures/induced_action/ex1.pdf"
+
+ggsave(path, p)
+```
+
