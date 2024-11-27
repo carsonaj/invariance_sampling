@@ -1,0 +1,124 @@
+---
+title: "Untitled"
+output: pdf_document
+date: "2024-11-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(MASS)
+library(ggplot2)
+```
+
+```{r}
+# functions: 
+grahm_schimdtR <- function(A) {
+    m <- nrow(A)
+    n <- ncol(A)
+    Q <- matrix(0, nrow = m, ncol = n)
+    R <- matrix(0, nrow = n, ncol = n)
+    for (j in 1:n) {
+    v <- A[ , j, drop = FALSE]
+        if (j > 1) {
+          for(i in 1:(j-1)) {
+            R[i, j] <- t(Q[,i,drop = FALSE]) %*% A[ , j, drop = FALSE]
+            v <- v - R[i, j] * Q[ ,i]
+          }
+        }
+    R[j, j] = norm(v, type = "2")
+    Q[ ,j] = v / R[j, j]
+    }
+
+    return(list("Q" = Q, "R" = R))
+}
+
+
+sample_mixture <- function(n, d, k, mean_list, variance_list, component_probs) {
+  
+  samples <- matrix(0, n, d)
+  components <- sample(x = (1:k), size = n, replace = TRUE, prob = component_probs)
+  
+  for (i in (1:n)) {
+    component_i <- components[i]
+    mean_i <- mean_list[[component_i]]
+    variance_i <- variance_list[[component_i]]
+    sample_i <- mvrnorm(n = 1, mu = mean_i, variance_i)
+    
+    samples[i, ] <- sample_i
+  }
+  
+  samples_df <- data.frame(samples)
+  samples_df$components <- components
+  
+  return(samples_df)
+}
+```
+
+
+```{r}
+# sampling:
+
+# number of samples
+n <- 1000
+# dimension of data
+d <- 3
+# number of components in mixture
+k <- 3
+# component probabilities
+component_probs <- c(rep(1/3, k))
+# component means
+mean_list <- vector(mode = "list", length = k)
+# component covariance matrices
+variance_list <- vector(mode = "list", length = k)
+
+# populate mean and variance lists
+for (i in (1:k)) {
+  mean_i <- runif(n = d, min = -20, max = 20)
+  variance_i <- crossprod(matrix(runif(n = d^2, min = -3, max = 3), d, d))
+  
+  mean_list[[i]] <- mean_i
+  variance_list[[i]] <- variance_i
+}
+
+samples <- sample_mixture(n, d, k, mean_list, variance_list, component_probs)
+```
+
+```{r}
+# plotting:
+
+samples_df <- data.frame(samples)
+ggplot(samples_df) + geom_point(aes(x = X1, y = X2, color = as.factor(components)))
+```
+
+```{r}
+# compress: 
+
+samples_df_compressed <- samples_df[, c(d, d+1)]
+samples_df_compressed$components <- samples_df$components
+
+for (i in (1:n)) {
+  sample_i <- t(samples_df[i, (1:d)])
+  component_i <- samples_df$components[i]
+  
+  sig_i <- variance_list[[component_i]]
+  eigen_sig_i <- eigen(sig_i)
+  V <- eigen_sig_i$vectors
+  Lam_sqrt <- diag(sqrt(eigen_sig_i$values))
+  sig_i_sqrt <- V %*% Lam_sqrt %*% t(V)
+  
+  samples_df_compressed[i, 1] <- crossprod(sig_i_sqrt %*% sample_i)
+}
+
+head(samples_df_compressed)
+```
+
+```{r}
+# Reconstruction
+X <- matrix(rnorm(d, d), d, d)
+QR_decomp <- grahm_schimdtR(X)
+Q <- QR_decomp$Q
+
+
+```
+

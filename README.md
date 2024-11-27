@@ -1,2 +1,2 @@
-# invariMH
-Invariance Metropolis-Hastings
+# invariance_sampling
+Invariance_sampling
