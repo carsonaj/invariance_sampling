@@ -13,24 +13,40 @@ library(ggplot2)
 
 ```{r}
 # functions: 
-grahm_schimdtR <- function(A) {
-    m <- nrow(A)
-    n <- ncol(A)
-    Q <- matrix(0, nrow = m, ncol = n)
-    R <- matrix(0, nrow = n, ncol = n)
-    for (j in 1:n) {
-    v <- A[ , j, drop = FALSE]
-        if (j > 1) {
-          for(i in 1:(j-1)) {
-            R[i, j] <- t(Q[,i,drop = FALSE]) %*% A[ , j, drop = FALSE]
-            v <- v - R[i, j] * Q[ ,i]
-          }
-        }
-    R[j, j] = norm(v, type = "2")
-    Q[ ,j] = v / R[j, j]
-    }
 
-    return(list("Q" = Q, "R" = R))
+proj_u <- function(v, u, Sig) {
+  vu <- as.numeric(crossprod(v, Sig %*% u))
+  uu <- as.numeric(crossprod(u, Sig %*% u))
+  p_v <- (vu / uu) * u
+  return(p_v)
+}
+
+grahm_schimdt <- function(A, Sig) {
+   # browser()
+    n <- nrow(A)
+    U <- matrix(0, n, n)
+    E <- matrix(0, n, n)
+    U[ , 1] <- A[ , 1]
+    E[ , 1] <- U[ , 1] / as.numeric(crossprod(U[ , 1], Sig %*% U[ , 1]))^.5
+    
+    for (j in 2:n) {
+      U[ , j] <- A[ , j]
+        for (k in (1:(j-1))) {
+          U[ , j] <- U[ , j] - proj_u(A[ , j], U[ , k], Sig)
+        }
+      
+      E[ , j] <- U[, j, drop = FALSE] / as.numeric(crossprod(U[ , j], Sig %*% U[ , j]))^.5
+    }
+      
+    return(E)
+}
+
+sample_haar_orthogonal_matrix <- function(Sig) {
+  d <- nrow(Sig)
+  X <- X <- matrix(rnorm(d^2), d, d)
+  U <- grahm_schimdt(X, Sig)
+  
+  return(U)
 }
 
 
@@ -54,6 +70,17 @@ sample_mixture <- function(n, d, k, mean_list, variance_list, component_probs) {
   return(samples_df)
 }
 ```
+
+```{r}
+# test grahm schmidt
+z <- 3
+A <- matrix(rnorm(z^2), z, z) 
+Sig <- diag(z)
+
+X <- grahm_schimdt(A, Sig)
+crossprod(X)
+```
+
 
 
 ```{r}
@@ -115,9 +142,15 @@ head(samples_df_compressed)
 
 ```{r}
 # Reconstruction
-X <- matrix(rnorm(d, d), d, d)
-QR_decomp <- grahm_schimdtR(X)
-Q <- QR_decomp$Q
+orthogonal_haar_samples <- vector(mode = "list", length = n)
+for (i in (1:n)) {
+  component_i <- samples_df_compressed$components[i]
+  Sig_i <- variance_list[[component_i]]
+  U_i <- sample_haar_orthogonal_matrix(Sig_i)
+  orthogonal_haar_samples[[i]] <- U_i
+}
+
+
 
 
 ```
